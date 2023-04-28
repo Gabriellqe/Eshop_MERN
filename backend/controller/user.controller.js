@@ -9,6 +9,7 @@ const ErrorHandler = require("../utils/ErrorHandler");
 const sendMail = require("../utils/sendMail");
 const sendTokenCookie = require("../utils/jwtToken");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
+const { isAuthenticated } = require("../middleware/auth");
 
 //Creater User
 router.post("/create-user", upload.single("file"), async (req, res, next) => {
@@ -122,6 +123,7 @@ router.post(
           new ErrorHandler("Please provide the correct information", 400)
         );
       }
+      // thats send token to cookies for used in the middleware Auth
       sendTokenCookie(user, 201, res);
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
@@ -129,12 +131,29 @@ router.post(
   })
 );
 
-/*router.post("/create-user", async (req, res, next) => {
-  try {
-  } catch (error) {}
-});
+//Load User
+router.get(
+  "/getuser",
+  isAuthenticated,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const user = await UserModel.findById(req.user.id);
 
-router.post("/create-user", async (req, res, next) => {
+      if (!user) {
+        return next(new ErrorHandler("User doesn't exists", 400));
+      }
+
+      res.status(200).json({
+        success: true,
+        user,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+/*router.post("/create-user", async (req, res, next) => {
   try {
   } catch (error) {}
 });
