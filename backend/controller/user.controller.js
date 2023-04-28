@@ -7,6 +7,7 @@ const { upload } = require("../multer");
 const fs = require("fs");
 const ErrorHandler = require("../utils/ErrorHandler");
 const sendMail = require("../utils/sendMail");
+const sendTokenCookie = require("../utils/jwtToken");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 
 //Creater User
@@ -70,16 +71,65 @@ router.post(
   "/activation",
   catchAsyncErrors(async (req, res, next) => {
     try {
-    } catch (error) {}
+      const { activation_token } = req.body;
+      const newUser = jwt.verify(
+        activation_token,
+        process.env.ACTIVATION_SECRET
+      );
+
+      if (!newUser) {
+        return next(new ErrorHandler("Invalid token", 400));
+      }
+
+      const { name, email, password, avatar } = newUser;
+
+      let user = await UserModel.findOne({ email });
+      if (user) {
+        return next(new ErrorHandler("User already exists", 400));
+      }
+
+      user = await UserModel.create({
+        name,
+        email,
+        password,
+        avatar,
+      });
+
+      sendTokenCookie(user, 201, res);
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
   })
 );
 
-/* router.post("/create-user", async (req, res, next) => {
-  try {
-  } catch (error) {}
-});
+//Login User
+router.post(
+  "/login-user",
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const { email, password } = req.body;
+      if (!email || !password) {
+        return next(new ErrorHandler("Please provide email and password", 400));
+      }
+      const user = await UserModel.findOne({ email }).select("+password");
 
-router.post("/create-user", async (req, res, next) => {
+      if (!user) {
+        return next(new ErrorHandler("User not found", 400));
+      }
+      const isPasswordValid = await user.comparePassword(password);
+      if (!isPasswordValid) {
+        return next(
+          new ErrorHandler("Please provide the correct information", 400)
+        );
+      }
+      sendTokenCookie(user, 201, res);
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+/*router.post("/create-user", async (req, res, next) => {
   try {
   } catch (error) {}
 });
