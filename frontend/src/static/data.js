@@ -229,7 +229,7 @@ export const categoriesData = [
     title: "Gifts",
     subTitle: "",
     image_Url:
-      "https://securecdn.pymnts.com/wp-content/uploads/2014/11/Gifts-Photo-700x489.jpg",
+      "https://th.bing.com/th/id/R.9c766108d0e21ca6ff62c12ee99422be?rik=QxXhNKsU6nGN8g&pid=ImgRaw&r=0",
   },
   {
     id: 7,
