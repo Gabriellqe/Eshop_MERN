@@ -1,6 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-
+import axios from "axios";
+import { server } from "../../server";
+import { toast } from "react-toastify";
 import { AiOutlineLogin, AiOutlineMessage } from "react-icons/ai";
 import { RiLockPasswordLine } from "react-icons/ri";
 import { MdOutlineTrackChanges } from "react-icons/md";
@@ -11,7 +13,18 @@ import { HiOutlineReceiptRefund, HiOutlineShoppingBag } from "react-icons/hi";
 const ProfileSidebar = ({ setActive, active }) => {
   const navigate = useNavigate();
 
-  const logoutHandler = () => {};
+  const logoutHandler = () => {
+    axios
+      .get(`${server}/user/logout`, { withCredentials: true })
+      .then((res) => {
+        toast.success(res.data.message);
+        navigate("/login");
+        window.location.reload(true);
+      })
+      .catch((error) => {
+        console.log(error.response.data.message);
+      });
+  };
 
   return (
     <div className="w-full bg-white shadow-sm rounded-[10px] p-4 pt-8">

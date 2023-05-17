@@ -3,6 +3,11 @@ import styles from "../../styles/styles";
 import { AiOutlineCamera } from "react-icons/ai";
 import { backend_url } from "../../server";
 import { useSelector } from "react-redux";
+import AllOrders from "./AllOrders.jsx";
+import AllRefundOrders from "./AllRefundOrders.jsx";
+import TrackOrder from "./TrackOrder.jsx";
+import ChangePassword from "./ChangePassword.jsx";
+import Address from "./Address.jsx";
 
 const ProfileContent = ({ active }) => {
   const { user } = useSelector((state) => state.user);
@@ -108,7 +113,39 @@ const ProfileContent = ({ active }) => {
       )}
 
       {/* Order section */}
-      {active === 2 && <div></div>}
+      {active === 2 && (
+        <div>
+          <AllOrders />
+        </div>
+      )}
+
+      {/* AllRefundOrders section */}
+      {active === 3 && (
+        <div>
+          <AllRefundOrders />
+        </div>
+      )}
+
+      {/* Track order */}
+      {active === 5 && (
+        <div>
+          <TrackOrder />
+        </div>
+      )}
+
+      {/* Change Password */}
+      {active === 6 && (
+        <div>
+          <ChangePassword />
+        </div>
+      )}
+
+      {/*  user Address */}
+      {active === 7 && (
+        <div>
+          <Address />
+        </div>
+      )}
     </div>
   );
 };
