@@ -6,6 +6,10 @@ const cors = require("cors");
 const ErrorHandler = require("./middleware/error");
 const morgan = require("morgan");
 
+//import routes
+const userRoute = require("./controller/user.controller");
+const shopRoute = require("./controller/shop.controller");
+
 // config init
 app.use(express.json());
 app.use(cookieParser());
@@ -19,11 +23,8 @@ app.use("/", express.static("uploads"));
 app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
 app.use(morgan("dev"));
 
-//import routes
-
-const userRoute = require("./controller/user.controller");
-
 app.use("/api/v1/user", userRoute);
+app.use("/api/v1/shop", shopRoute);
 
 // config environment
 if (process.env.NODE_ENV !== "PRODUCTION") {
