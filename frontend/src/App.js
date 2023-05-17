@@ -13,12 +13,16 @@ import {
   ProfilePage,
   CheckoutPage,
   OrderSuccessPage,
+  ShopCreatePage,
+  SellerActivationPage,
+  ShopLoginPage,
 } from "./routes/Routes.js";
 import { useEffect } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Store from "./redux/store";
 import { loadUser } from "./redux/actions/user";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
   useEffect(() => {
@@ -40,9 +44,31 @@ function App() {
         <Route path="/best-selling" element={<BestSellingPage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/faq" element={<FAQPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute>
+              <CheckoutPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/order/success" element={<OrderSuccessPage />} />
+
+        {/* --SHOP ROUTES-- */}
+        <Route
+          path="/seller/activation/:activation_token"
+          element={<SellerActivationPage />}
+        />
+        <Route path="/shop-create" element={<ShopCreatePage />} />
+        <Route path="/shop-login" element={<ShopLoginPage />} />
       </Routes>
       <ToastContainer
         position="bottom-center"
