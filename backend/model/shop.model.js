@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
-const userSchema = new mongoose.Schema({
-  name: { type: String, required: [true, "Please enter your name!"] },
+const shopSchema = new mongoose.Schema({
+  name: { type: String, required: [true, "Please enter your shop name!"] },
   email: { type: String, required: [true, "Please enter your email address"] },
   password: {
     type: String,
@@ -11,27 +11,19 @@ const userSchema = new mongoose.Schema({
     minLength: [6, "Password should be greater than 6 characters"],
     select: false,
   },
-  phoneNumber: { type: Number },
-
-  addresses: [
-    {
-      country: { type: String },
-      city: { type: String },
-      address1: { type: String },
-      address2: { type: String },
-      zipCode: { type: Number },
-      addressType: { type: String },
-    },
-  ],
-  role: { type: String, default: "user" },
+  description: { type: String },
+  address: { type: String, required: true },
+  phoneNumber: { type: Number, required: true },
+  role: { type: String, default: "Seller" },
   avatar: { type: String, required: true },
+  zipCode: { type: Number, required: true },
   createdAt: { type: Date, default: Date.now() },
   resetPasswordToken: String,
   resetPasswordTime: Date,
 });
 
 //Hash password
-userSchema.pre("save", async function (next) {
+shopSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
     next();
   }
@@ -39,15 +31,15 @@ userSchema.pre("save", async function (next) {
 });
 
 // create token jwt wih ID user
-userSchema.methods.getJwtToken = function () {
+shopSchema.methods.getJwtToken = function () {
   return jwt.sign({ id: this.id }, process.env.JWT_SECRET_KEY, {
     expiresIn: process.env.JWT_EXPIRES,
   });
 };
 
 // comapre password
-userSchema.methods.comparePassword = async function (enteredPassword) {
+shopSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model("shop", shopSchema);
