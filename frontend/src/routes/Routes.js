@@ -10,6 +10,9 @@ import FAQPage from "../pages/FAQPage.jsx";
 import ProfilePage from "../pages/ProfilePage.jsx";
 import CheckoutPage from "../pages/CheckoutPage.jsx";
 import OrderSuccessPage from "../pages/OrderSuccessPage.jsx";
+import ShopCreatePage from "../pages/ShopCreatePage.jsx";
+import SellerActivationPage from "../pages/SellerActivationPage.jsx";
+import ShopLoginPage from "../pages/ShopLoginPage.jsx";
 
 export {
   HomePage,
@@ -24,4 +27,7 @@ export {
   ProfilePage,
   CheckoutPage,
   OrderSuccessPage,
+  ShopCreatePage,
+  SellerActivationPage,
+  ShopLoginPage,
 };
