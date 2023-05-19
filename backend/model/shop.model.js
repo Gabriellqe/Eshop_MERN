@@ -13,10 +13,10 @@ const shopSchema = new mongoose.Schema({
   },
   description: { type: String },
   address: { type: String, required: true },
-  phoneNumber: { type: Number, required: true },
+  phoneNumber: { type: Number },
   role: { type: String, default: "Seller" },
   avatar: { type: String, required: true },
-  zipCode: { type: Number, required: true },
+  zipCode: { type: Number },
   createdAt: { type: Date, default: Date.now() },
   resetPasswordToken: String,
   resetPasswordTime: Date,
@@ -42,4 +42,4 @@ shopSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-module.exports = mongoose.model("shop", shopSchema);
+module.exports = mongoose.model("Shop", shopSchema);
