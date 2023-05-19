@@ -64,7 +64,7 @@ function App() {
 
         {/* --SHOP ROUTES-- */}
         <Route
-          path="/seller/activation/:activation_token"
+          path="/shop/activation/:activation_token"
           element={<SellerActivationPage />}
         />
         <Route path="/shop-create" element={<ShopCreatePage />} />

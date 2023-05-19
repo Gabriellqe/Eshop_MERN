@@ -1,22 +1,22 @@
 const express = require("express");
-const router = express.Router();
 const ShopModel = require("../model/shop.model");
+const router = express.Router();
 const path = require("path");
-const fs = require("fs");
 const jwt = require("jsonwebtoken");
 const { upload } = require("../multer");
+const fs = require("fs");
+const ErrorHandler = require("../utils/ErrorHandler");
 const sendMail = require("../utils/sendMail");
 const sendShopToken = require("../utils/shopToken.js");
-const { isAuthenticated } = require("../middleware/auth");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
-const ErrorHandler = require("../utils/ErrorHandler");
+const { isAuthenticated } = require("../middleware/auth");
 
 // create shop
 router.post("/create-shop", upload.single("file"), async (req, res, next) => {
   try {
     const { email, password, name, address, phoneNumber, zipCode } = req.body;
-
     const sellerEmail = await ShopModel.findOne({ email });
+
     if (sellerEmail) {
       const filename = req.file.filename;
       const filePath = `uploads/${filename}`;
@@ -33,13 +33,13 @@ router.post("/create-shop", upload.single("file"), async (req, res, next) => {
     const fileUrl = path.join(filename);
 
     const seller = {
-      name,
-      email,
-      password,
+      name: name,
+      email: email,
+      password: password,
+      phoneNumber: phoneNumber,
+      zipCode: zipCode,
+      address: address,
       avatar: fileUrl,
-      address,
-      phoneNumber,
-      zipCode,
     };
 
     // create activation token
@@ -50,8 +50,7 @@ router.post("/create-shop", upload.single("file"), async (req, res, next) => {
     };
 
     const activationToken = createActivationToken(seller);
-
-    const activationUrl = `http://localhost:3000/seller/activation/${activationToken}`;
+    const activationUrl = `http://localhost:3000/shop/activation/${activationToken}`;
 
     try {
       await sendMail({
@@ -64,20 +63,19 @@ router.post("/create-shop", upload.single("file"), async (req, res, next) => {
         message: `please check your email:- ${seller.email} to activate your account!`,
       });
     } catch (error) {
-      return next(new ErrorHandler(error.message, 400));
+      return next(new ErrorHandler(error.message, 500));
     }
   } catch (error) {
-    return next(new ErrorHandler(error.message, 500));
+    return next(new ErrorHandler(error.message, 400));
   }
 });
 
 // activate shop
 router.post(
   "/activation",
-  catchAsyncErrors(async (req, res) => {
+  catchAsyncErrors(async (req, res, next) => {
     try {
       const { activation_token } = req.body;
-
       //Verify if the token is ok
       const newSeller = jwt.verify(
         activation_token,
@@ -94,20 +92,20 @@ router.post(
         newSeller;
 
       //check if the email already exists in  the database
-      let seller = ShopModel.findOne({ email });
+      /*       let seller = ShopModel.findOne({ email });
       if (seller) {
         return next(new ErrorHandler("User already exists", 400));
-      }
+      } */
 
       //create a new seller
       seller = await ShopModel.create({
         name,
         email,
-        password,
         avatar,
+        password,
+        zipCode,
         address,
         phoneNumber,
-        zipCode,
       });
 
       //create a token for the new seller
@@ -118,6 +116,15 @@ router.post(
   })
 );
 
+//create simple shop
+router.post("/create-simple-shop", async (req, res) => {
+  try {
+    const shop = await ShopModel.create(req.body);
+    res.status(201).json({ shop });
+  } catch (error) {
+    res.status(400).send(error);
+  }
+});
 // login shop
 router.post("/login-shop", async (req, res) => {});
 // get shop by id
