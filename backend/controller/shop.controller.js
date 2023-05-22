@@ -9,7 +9,7 @@ const ErrorHandler = require("../utils/ErrorHandler");
 const sendMail = require("../utils/sendMail");
 const sendShopToken = require("../utils/shopToken.js");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
-const { isAuthenticated } = require("../middleware/auth");
+const { isSeller } = require("../middleware/auth");
 
 // create shop
 router.post("/create-shop", upload.single("file"), async (req, res, next) => {
@@ -81,21 +81,19 @@ router.post(
         activation_token,
         process.env.ACTIVATION_SECRET
       );
-
       // if the token is not valid
       if (!newSeller) {
         return next(new ErrorHandler("Invalid token", 400));
       }
-
       //desctruing the newSeller object
       const { name, email, password, avatar, address, phoneNumber, zipCode } =
         newSeller;
 
       //check if the email already exists in  the database
-      /*       let seller = ShopModel.findOne({ email });
+      let seller = await ShopModel.findOne({ email });
       if (seller) {
         return next(new ErrorHandler("User already exists", 400));
-      } */
+      }
 
       //create a new seller
       seller = await ShopModel.create({
@@ -116,17 +114,56 @@ router.post(
   })
 );
 
-//create simple shop
-router.post("/create-simple-shop", async (req, res) => {
-  try {
-    const shop = await ShopModel.create(req.body);
-    res.status(201).json({ shop });
-  } catch (error) {
-    res.status(400).send(error);
-  }
-});
-// login shop
-router.post("/login-shop", async (req, res) => {});
+//Login Shop
+router.post(
+  "/login-shop",
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const { email, password } = req.body;
+      if (!email || !password) {
+        return next(new ErrorHandler("Please provide email and password", 400));
+      }
+      const shop = await ShopModel.findOne({ email }).select("+password");
+
+      if (!shop) {
+        return next(new ErrorHandler("User not found", 400));
+      }
+      const isPasswordValid = await shop.comparePassword(password);
+      if (!isPasswordValid) {
+        return next(
+          new ErrorHandler("Please provide the correct information", 400)
+        );
+      }
+      // thats send token to cookies for used in the middleware Auth
+      sendShopToken(shop, 201, res);
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+//Load Shop
+router.get(
+  "/getseller",
+  isSeller,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const seller = await ShopModel.findById(req.seller._id);
+
+      if (!seller) {
+        return next(new ErrorHandler("User doesn't exists", 400));
+      }
+
+      res.status(200).json({
+        success: true,
+        seller,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
 // get shop by id
 router.get("/get-shop/:id", async (req, res) => {});
 // get all shops
